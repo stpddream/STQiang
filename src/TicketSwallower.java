@@ -98,7 +98,7 @@ public class TicketSwallower {
      */
     public int startEngine() throws IOException {
 
-            try {
+          //  try {
             updater.updateStatus("Starting the Qiang! engine...");
             log("Starting Qiang! engine...");
             String realAdd = this.authenticate(this.getAuthUrl());
@@ -118,16 +118,10 @@ public class TicketSwallower {
                 else if(status == -2) return -2;
                 try {
                     Thread.sleep(10000); //If submit res returns true; It may be that tickets are not on sale yet, try again in 10s.
-                } catch (InterruptedException e) {}
+                } catch (InterruptedException e) { /* Do Nothing */ }
 
             }
             swallowTicket();
-            } catch(IOException e) {
-                updater.updateStatus("Connection Error.");
-                log("!!!!!!!!! Connection Error. !!!!!!!!!");
-                throw new IOException();
-            }
-
 
         return 0;
 
@@ -237,7 +231,9 @@ public class TicketSwallower {
             String responseStr = parseResponse(response);
 
             //Stupid way of judging error
-            if(!responseStr.contains("<!-- Error: login failed. -->")) {
+            if(!responseStr.contains("<!-- Error: login failed. -->") &&
+                    !responseStr.contains("An error has occurred")
+                    ) {
                 System.out.println(response.getStatusLine().getStatusCode());
                 System.out.println("Authorized. Redirecting to HaverTicket...");
                 updater.updateStatus("Authorized. Redirecting to HaverTicket...");

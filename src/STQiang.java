@@ -224,13 +224,15 @@ public class STQiang {
             } catch(IOException e) {
                 status = -3;
             }
-            if(status == -1)
+            if(status == -1)   {
+                updater.updateStatus("Login Failed: Invalid username and password");
                 JOptionPane.showMessageDialog(qiangPanel,
                         "Login Failed. Invalid username or password.",
                         "Authentication Error",
                         JOptionPane.ERROR_MESSAGE);
-
+            }
             else if(status == -2) {
+                updater.updateStatus("Reservation Failed: You already have a ticket.");
                 JOptionPane.showMessageDialog(qiangPanel,
                         "You already have a ticket!!!!!",
                         "Greedy Human",
@@ -239,6 +241,7 @@ public class STQiang {
             }
             else if(status == -3) {
 
+                updater.updateStatus("Connection Error. Contact Cornie.");
                 JOptionPane.showMessageDialog(qiangPanel,
                         "Remote Connection Error. Contact Cornie!!",
                         "Connection Error",
@@ -266,7 +269,7 @@ public class STQiang {
 
     public static void main(String[] args) {
 
-        JFrame frame = new JFrame("ST! Qiang 0.12 beta3 No Paper Due Edition");
+        JFrame frame = new JFrame("ST! Qiang 0.12 beta4 No Paper Due Edition");
         frame.setContentPane(new STQiang().qiangPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationByPlatform(true);
