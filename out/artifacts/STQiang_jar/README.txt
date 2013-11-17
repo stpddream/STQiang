@@ -1,5 +1,7 @@
-STQiang 0.12 beta2 No Paper Due Edition 
+STQiang 0.12 beta5 No Paper Due Edition 
 =========================================================================
+Please do NOT distrubute. Thanks!
+
 
 Prerequisite to use this program, read CAREFULLY before starting to use:
 
@@ -15,14 +17,13 @@ d. 查找event_id
     看到event_id=没。然也然也孺子可教！
     （本工具暂不支持直接浏览event，会不会写看造化了，暂觉无甚必要）
 e. 输入event_id和姓名
-f. 单击Scheduled Qiang.  （这个非常难听下次改掉）(Turn off sleep! Connect to internet cable if possible)
+f. 单击Gei Wo Qiang. (Turn off sleep of your operating system! Connect to internet cable if possible)
 g. 到头便睡，大梦谁先觉，醒来票已得。慷慨死犹勇，除非有bug。
 h. 周三前去拿票。
 
 Disclaimer
 1. 尚是测试版。出bug的几率和去dc发现非常难吃的几率差不多。
-2. 现在只能抢周一7点on sale的票。以后会加入自动调整抢票时间功能。
-3. 本工具不对因为没有起来抢票睡过头者负责。
+2. 本工具不对因为没有起来抢票睡过头者负责。
 
 
 *For now, this tool is for SEPTA passes on Monday only. 

@@ -13,9 +13,8 @@ import java.io.*;
 import java.net.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
@@ -24,8 +23,6 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
-
-import java.util.ArrayList;
 
 /**
  * Class that connects to Haverticket and sends out ticket reservation.
@@ -98,48 +95,102 @@ public class TicketSwallower {
      */
     public int startEngine() throws IOException {
 
-          //  try {
-            updater.updateStatus("Starting the Qiang! engine...");
-            log("Starting Qiang! engine...");
-            String realAdd = this.authenticate(this.getAuthUrl());
-            if(realAdd == null) return -1; //Authentication Failure
-            getCookieAuth(realAdd);
+        while(true) {
+            try {
+                updater.updateStatus("Starting the Qiang! engine...");
+                log("Starting Qiang! engine...");
+                String realAdd = this.authenticate(this.getAuthUrl());
+                if(realAdd == null) return -1; //Authentication Failure
+                getCookieAuth(realAdd);
 
-            /**
-             * Status code for submitting reservation:
-             * STATUS 0 Success. Proceed to confirmation page.
-             * STATUS 1 Tickets are not posted yet.
-             * STATUS -2 User already has a ticket.
-             */
-            while(true) {
+                /**
+                 * Status code for submitting reservation:
+                 * STATUS 0 Success. Proceed to confirmation page.
+                 * STATUS 1 Tickets are not posted yet.
+                 * STATUS -2 User already has a ticket.
+                 */
+                while(true) {
 
-                int status = submitRes();
-                if(status == 0) break;
-                else if(status == -2) return -2;
+                    int status = submitRes();
+                    if(status == 0) break;
+                    else if(status == -2) return -2;
+                    try {
+                        Thread.sleep(10000); //If submit res returns true; It may be that tickets are not on sale yet, try again in 10s.
+                    } catch (InterruptedException e) { /* Do Nothing */ }
+
+                }
+                swallowTicket();
+                break;
+
+            }catch(IOException e) {
+                updater.updateStatus("Connection Failed. Retry in 15s....");
+                log("Connection Failed. Retry in 15s");
+
                 try {
-                    Thread.sleep(10000); //If submit res returns true; It may be that tickets are not on sale yet, try again in 10s.
-                } catch (InterruptedException e) { /* Do Nothing */ }
-
+                    Thread.sleep(15000);
+                } catch(InterruptedException e2) { /*Do nothing*/}
+                continue;
             }
-            swallowTicket();
+        }
 
         return 0;
 
     }
 
-    public boolean testAuth() throws IOException {
+    public String testAuth() throws IOException {
 
         updater.updateStatus("Validating Password...");
         log("Validating Password...");
 
-            String realAdd = this.authenticate(this.getAuthUrl());
-            if(realAdd == null) return false; //Authentication Failure
+        String realAdd = this.authenticate(this.getAuthUrl());
+        if(realAdd == null) return null; //Authentication Failure
+        this.getCookieAuth(realAdd);
+        String date = this.getQiangDate();
 
         updater.updateStatus("Validated. Waiting for the ticket....");
-        log("Validated. Waiting for th ticket");
-        return true;
+        log("Validated. Waiting for the ticket");
+        return date;
 
     }
+
+    private String getQiangDate() throws IOException {
+
+
+        HttpClient client = HttpClientBuilder.create()
+                .setDefaultCookieStore(cookieStore)
+                .build();
+
+        updater.updateStatus("Getting On sale date...");
+        log("Getting On Sale Date...");
+
+        HttpGet request = new HttpGet(reserveUrl);
+        HttpResponse response = null;
+
+        response = client.execute(request);
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(response.getEntity().getContent()));
+
+        System.out.println(response.getStatusLine().getStatusCode());
+        System.out.println(response);
+
+        String line;
+        StringBuilder strBody = new StringBuilder();
+        while((line = br.readLine()) != null) {
+            strBody.append(line);
+        }
+
+        String content = strBody.toString();
+        log(content);
+        String startStr = "Tickets Go On Sale:</td><td>";
+        String endStr = "</td>";
+        int start = content.indexOf(startStr) + startStr.length();
+        int end = content.indexOf(endStr, start);
+        return content.substring(start, end);
+
+    }
+
+
 
     private String getAuthUrl() throws IOException {
 

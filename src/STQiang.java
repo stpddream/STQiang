@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -76,8 +77,12 @@ public class STQiang {
                         TicketSwallower ticketSwallower = new TicketSwallower(txtUserName.getText(),
                                 txtPassword.getText(), txtName.getText(), txtEventId.getText(), updater);
 
+                        String targetDateStr = null;
+
                         try {
-                            if(!ticketSwallower.testAuth()) {
+
+                            targetDateStr = ticketSwallower.testAuth();
+                            if(targetDateStr == null) {
                                 JOptionPane.showMessageDialog(qiangPanel,
                                         "Login Failed. Invalid username or password.",
                                         "Authentication Error",
@@ -86,12 +91,11 @@ public class STQiang {
                             }
                             else {
 
-                                Date targetDate = getQiangDate();
+                                final Date targetDate = parseSaleDate(targetDateStr);
                                 warningTimer = new Timer();
                                 warningTimer.scheduleAtFixedRate(new TimerTask() {
                                     @Override
                                     public void run() {
-                                        Date targetDate = getQiangDate();
                                         long remaint = (targetDate.getTime() - Calendar.getInstance().getTime().getTime()) / 1000;
 
                                         if(remaint <= 0) {
@@ -132,8 +136,14 @@ public class STQiang {
                                     "ERROR: could not establish connection to remote server.",
                                     "Connection Error",
                                     JOptionPane.ERROR_MESSAGE);
-                            return ;
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                            JOptionPane.showMessageDialog(qiangPanel,
+                                    "ERROR: something strange happens!!!!!",
+                                    "You are lucky",
+                                    JOptionPane.ERROR_MESSAGE);
                         }
+
 
                     }
 
@@ -182,6 +192,13 @@ public class STQiang {
 
         calendar.add(Calendar.DATE, days);
         return calendar.getTime();
+
+    }
+
+    private static Date parseSaleDate(String dateStr) throws ParseException {
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM d yyyy K:mm a");
+            return simpleDateFormat.parse(dateStr);
 
     }
 
@@ -269,7 +286,7 @@ public class STQiang {
 
     public static void main(String[] args) {
 
-        JFrame frame = new JFrame("ST! Qiang 0.12 beta4 No Paper Due Edition");
+        JFrame frame = new JFrame("ST! Qiang 0.12 beta5 No Paper Due Edition");
         frame.setContentPane(new STQiang().qiangPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationByPlatform(true);
