@@ -3,15 +3,11 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 import java.util.Timer;
-import java.util.TimerTask;
 
 /*
 
@@ -54,19 +50,25 @@ public class STQiang {
         lblTicketSale.setVisible(false);
 
         /* Secret Debug Entrance */
+        /*
         lblStar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Thread testQiang = new Thread(new QiangTask());
                 testQiang.start();
             }
-        });
+        });*/
 
         btnSchedule.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
                 if(!validateInput()) return ;
+                txtPassword.setEnabled(false);
+                txtUserName.setEnabled(false);
+                txtName.setEnabled(false);
+                txtEventId.setEnabled(false);
+                btnCancel.setEnabled(true);
 
                 Thread qiangThread = new Thread(new Runnable() {
                     @Override
@@ -87,6 +89,8 @@ public class STQiang {
                                         "Login Failed. Invalid username or password.",
                                         "Authentication Error",
                                         JOptionPane.ERROR_MESSAGE);
+
+                                revertStates();
                                 return ;
                             }
                             else {
@@ -114,19 +118,12 @@ public class STQiang {
                                 timer.schedule(new QiangTask(), targetDate);          //Schedule Task
 
 
-
                                 //Set GUI
                                 txtTicketSale.setVisible(true);
                                 lblTicketSale.setVisible(true);
 
                                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd EEE HH:mm");
                                 txtTicketSale.setText(dateFormat.format(targetDate));
-
-                                txtPassword.setEnabled(false);
-                                txtUserName.setEnabled(false);
-                                txtName.setEnabled(false);
-                                txtEventId.setEnabled(false);
-                                btnCancel.setEnabled(true);
 
                             }
 
@@ -136,12 +133,22 @@ public class STQiang {
                                     "ERROR: could not establish connection to remote server.",
                                     "Connection Error",
                                     JOptionPane.ERROR_MESSAGE);
+                            if(warningTimer != null) warningTimer.cancel();
+                            revertStates();
                         } catch(Exception e) {
                             e.printStackTrace();
+                            try {
+                                ticketSwallower.log(e.toString());
+                            } catch(IOException e2) {
+                                e2.printStackTrace();
+                            }
+
                             JOptionPane.showMessageDialog(qiangPanel,
                                     "ERROR: something strange happens!!!!!",
                                     "You are lucky",
                                     JOptionPane.ERROR_MESSAGE);
+                            if(warningTimer != null) warningTimer.cancel();
+                            revertStates();
                         }
 
 
@@ -158,15 +165,16 @@ public class STQiang {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                timer.cancel();
+                if(timer != null) timer.cancel();
                 txtPassword.setEnabled(true);
                 txtUserName.setEnabled(true);
                 txtName.setEnabled(true);
                 txtEventId.setEnabled(true);
                 btnSchedule.setEnabled(true);
                 btnCancel.setEnabled(false);
-                warningTimer.cancel();
+                if(warningTimer != null) warningTimer.cancel();
                 lblStar.setText("抢");
+                updater.updateStatus("Cancelled.");
 
             }
 
@@ -174,6 +182,21 @@ public class STQiang {
 
     }
 
+
+    private void revertStates() {
+
+        txtPassword.setEnabled(true);
+        txtUserName.setEnabled(true);
+        txtName.setEnabled(true);
+        txtEventId.setEnabled(true);
+        btnSchedule.setEnabled(true);
+        btnCancel.setEnabled(false);
+        if(warningTimer != null) warningTimer.cancel();
+        lblStar.setText("抢");
+
+    }
+
+    @Deprecated
     private static Date getQiangDate() {
 
         Calendar calendar = Calendar.getInstance();
@@ -197,7 +220,7 @@ public class STQiang {
 
     private static Date parseSaleDate(String dateStr) throws ParseException {
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM d yyyy K:mm a");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM d yyyy h:mm a", Locale.US);
             return simpleDateFormat.parse(dateStr);
 
     }
@@ -286,7 +309,7 @@ public class STQiang {
 
     public static void main(String[] args) {
 
-        JFrame frame = new JFrame("ST! Qiang 0.12 beta5 No Paper Due Edition");
+        JFrame frame = new JFrame("ST! Qiang No Midterm Edition");
         frame.setContentPane(new STQiang().qiangPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationByPlatform(true);

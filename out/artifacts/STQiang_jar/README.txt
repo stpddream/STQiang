@@ -1,4 +1,4 @@
-STQiang 0.12 beta5 No Paper Due Edition 
+STQiang 0.12 beta5 No Midterm Edition
 =========================================================================
 Please do NOT distrubute. Thanks!
 

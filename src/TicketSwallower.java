@@ -131,6 +131,8 @@ public class TicketSwallower {
                 } catch(InterruptedException e2) { /*Do nothing*/}
                 continue;
             }
+
+
         }
 
         return 0;
@@ -139,15 +141,16 @@ public class TicketSwallower {
 
     public String testAuth() throws IOException {
 
-        updater.updateStatus("Validating Password...");
-        log("Validating Password...");
 
         String realAdd = this.authenticate(this.getAuthUrl());
+
         if(realAdd == null) return null; //Authentication Failure
         this.getCookieAuth(realAdd);
         String date = this.getQiangDate();
 
         updater.updateStatus("Validated. Waiting for the ticket....");
+        updater.updateStatus("-------------------------------------");
+        updater.updateStatus("Besure sleep is turned off, \npower cable is plugged in and \ncheck internet connection before going to bed!!");
         log("Validated. Waiting for the ticket");
         return date;
 
@@ -243,9 +246,9 @@ public class TicketSwallower {
                     .setDefaultCookieStore(new BasicCookieStore())  //Cookies are ignored
                     .build();
 
-            System.out.print("Authorizing username and password...");
-            updater.updateStatus("Authorizing username and password...");
-            log("Authorizing...");
+            System.out.print("Validating username and password...");
+            updater.updateStatus("Validatig username and password...");
+            log("Validating...");
 
             HttpPost post = new HttpPost(url);
             post.addHeader("Content-Type", "application/x-www-form-urlencoded");
